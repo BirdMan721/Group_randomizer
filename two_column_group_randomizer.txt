@@ -4,27 +4,15 @@ from tkinter import messagebox
 import os
 
 class NameGroupRandomizer:
-    def __init__(self, students, teachers):
-        self.students = students
-        self.teachers = teachers
+    def __init__(self, column1_names, column2_names):
+        self.column1_names = column1_names
+        self.column2_names = column2_names
 
     def create_groups(self):
-        random.shuffle(self.students)
-        teachers_copy = self.teachers[:]
-        random.shuffle(teachers_copy)
-
-        groups = []
-        num_students = len(self.students)
-        num_teachers = len(teachers_copy)
-
-        for i in range(num_students):
-            student = self.students[i]
-            num_assigned_teachers = 2 if i < num_teachers - num_students else 1
-            assigned_teachers = random.sample(teachers_copy, num_assigned_teachers)
-            groups.append((student, assigned_teachers))
-            for teacher in assigned_teachers:
-                teachers_copy.remove(teacher)
-
+        random.shuffle(self.column1_names)
+        random.shuffle(self.column2_names)
+        min_length = min(len(self.column1_names), len(self.column2_names))
+        groups = [(self.column1_names[i], self.column2_names[i]) for i in range(min_length)]
         return groups
 
 class Application(tk.Tk):
@@ -33,52 +21,52 @@ class Application(tk.Tk):
         self.title("Name Group Randomizer")
         self.geometry("450x500")
 
-        self.students = self.load_names_from_file("students.txt")
-        self.teachers = self.load_names_from_file("teachers.txt")
+        self.column1_names = self.load_names_from_file("column1_names.txt")
+        self.column2_names = self.load_names_from_file("column2_names.txt")
         self.groups = self.load_groups_from_file()
 
         # Create a main frame for organizing the layout
         self.main_frame = tk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-        # Frame for Students
-        self.students_frame = tk.Frame(self.main_frame)
-        self.students_frame.grid(row=0, column=0, padx=10)
+        # Frame for Column 1
+        self.column1_frame = tk.Frame(self.main_frame)
+        self.column1_frame.grid(row=0, column=0, padx=10)
 
-        self.label1 = tk.Label(self.students_frame, text="Students:")
+        self.label1 = tk.Label(self.column1_frame, text="Column 1:")
         self.label1.pack(pady=5)
 
-        self.entry_name1 = tk.Entry(self.students_frame, width=30)
+        self.entry_name1 = tk.Entry(self.column1_frame, width=30)
         self.entry_name1.pack(pady=5)
 
-        self.add_button1 = tk.Button(self.students_frame, text="Add Name", command=self.add_student)
+        self.add_button1 = tk.Button(self.column1_frame, text="Add Name", command=self.add_name1)
         self.add_button1.pack(pady=5)
 
-        self.names_listbox1 = tk.Listbox(self.students_frame)
+        self.names_listbox1 = tk.Listbox(self.column1_frame)
         self.names_listbox1.pack(pady=5)
         self.update_listbox1()
 
-        self.delete_button1 = tk.Button(self.students_frame, text="Delete Selected Name", command=self.delete_student)
+        self.delete_button1 = tk.Button(self.column1_frame, text="Delete Selected Name", command=self.delete_name1)
         self.delete_button1.pack(pady=5)
 
-        # Frame for Teachers
-        self.teachers_frame = tk.Frame(self.main_frame)
-        self.teachers_frame.grid(row=0, column=1, padx=10)
+        # Frame for Column 2
+        self.column2_frame = tk.Frame(self.main_frame)
+        self.column2_frame.grid(row=0, column=1, padx=10)
 
-        self.label2 = tk.Label(self.teachers_frame, text="Teachers:")
+        self.label2 = tk.Label(self.column2_frame, text="Column 2:")
         self.label2.pack(pady=5)
 
-        self.entry_name2 = tk.Entry(self.teachers_frame, width=30)
+        self.entry_name2 = tk.Entry(self.column2_frame, width=30)
         self.entry_name2.pack(pady=5)
 
-        self.add_button2 = tk.Button(self.teachers_frame, text="Add Name", command=self.add_teacher)
+        self.add_button2 = tk.Button(self.column2_frame, text="Add Name", command=self.add_name2)
         self.add_button2.pack(pady=5)
 
-        self.names_listbox2 = tk.Listbox(self.teachers_frame)
+        self.names_listbox2 = tk.Listbox(self.column2_frame)
         self.names_listbox2.pack(pady=5)
         self.update_listbox2()
 
-        self.delete_button2 = tk.Button(self.teachers_frame, text="Delete Selected Name", command=self.delete_teacher)
+        self.delete_button2 = tk.Button(self.column2_frame, text="Delete Selected Name", command=self.delete_name2)
         self.delete_button2.pack(pady=5)
 
         # Group Management
@@ -89,44 +77,44 @@ class Application(tk.Tk):
         self.show_groups_button.grid(row=2, column=0, columnspan=2, pady=10)
 
 
-    def add_student(self):
+    def add_name1(self):
         name = self.entry_name1.get()
         if name:
-            self.students.append(name)
+            self.column1_names.append(name)
             self.update_listbox1()
             self.entry_name1.delete(0, tk.END)
-            self.save_names_to_file(self.students, "students.txt")
+            self.save_names_to_file(self.column1_names, "column1_names.txt")
 
-    def delete_student(self):
+    def delete_name1(self):
         selected_index = self.names_listbox1.curselection()
         if selected_index:
-            self.students.pop(selected_index[0])
+            self.column1_names.pop(selected_index[0])
             self.update_listbox1()
-            self.save_names_to_file(self.students, "students.txt")
+            self.save_names_to_file(self.column1_names, "column1_names.txt")
 
     def update_listbox1(self):
         self.names_listbox1.delete(0, tk.END)
-        for name in self.students:
+        for name in self.column1_names:
             self.names_listbox1.insert(tk.END, name)
 
-    def add_teacher(self):
+    def add_name2(self):
         name = self.entry_name2.get()
         if name:
-            self.teachers.append(name)
+            self.column2_names.append(name)
             self.update_listbox2()
             self.entry_name2.delete(0, tk.END)
-            self.save_names_to_file(self.teachers, "teachers.txt")
+            self.save_names_to_file(self.column2_names, "column2_names.txt")
 
-    def delete_teacher(self):
+    def delete_name2(self):
         selected_index = self.names_listbox2.curselection()
         if selected_index:
-            self.teachers.pop(selected_index[0])
+            self.column2_names.pop(selected_index[0])
             self.update_listbox2()
-            self.save_names_to_file(self.teachers, "teachers.txt")
+            self.save_names_to_file(self.column2_names, "column2_names.txt")
 
     def update_listbox2(self):
         self.names_listbox2.delete(0, tk.END)
-        for name in self.teachers:
+        for name in self.column2_names:
             self.names_listbox2.insert(tk.END, name)
 
     def save_names_to_file(self, names, filename):
@@ -154,8 +142,7 @@ class Application(tk.Tk):
         file_path = os.path.join(folder_path, "groups.txt")
         with open(file_path, "w") as file:
             for group in groups:
-                group_str = f"Student: {group[0]}, Teachers: {', '.join(group[1])}\n"
-                file.write(group_str)
+                file.write(f"Group: {group[0]}, {group[1]}\n")
 
     def load_groups_from_file(self):
         folder_path = "name_group_data"
@@ -167,27 +154,26 @@ class Application(tk.Tk):
         return []
 
     def create_groups(self):
-        if not self.students or not self.teachers:
-            messagebox.showerror("No names", "Please add some names to both lists first.")
+        if not self.column1_names or not self.column2_names:
+            messagebox.showerror("No names", "Please add some names to both columns first.")
             return
 
-        randomizer = NameGroupRandomizer(self.students, self.teachers)
-        self.groups = randomizer.create_groups()
-        self.save_groups_to_file(self.groups)
+        randomizer = NameGroupRandomizer(self.column1_names, self.column2_names)
+        groups = randomizer.create_groups()
+        self.save_groups_to_file(groups)
 
         group_text = ""
-        for group in self.groups:
-            group_text += f"Student: {group[0]}, Teachers: {', '.join(group[1])}\n"
+        for group in groups:
+            group_text += f"Group: {group[0]}, {group[1]}\n"
 
         messagebox.showinfo("Groups", group_text)
 
     def show_groups(self):
-        groups = self.load_groups_from_file()
-        if not groups:
+        if not self.groups:
             messagebox.showinfo("No groups", "No groups to display.")
             return
 
-        group_text = "\n".join(groups)
+        group_text = "\n".join(self.groups)
         messagebox.showinfo("Last Groups", group_text)
 
 if __name__ == "__main__":
